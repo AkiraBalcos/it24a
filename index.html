@@ -34,7 +34,30 @@
         li.appendChild(taskSpan);
 
         document.getElementById('taskList').appendChild(li);
+
+        //Call create DoneButton function
+        const doneBtn = createDoneButton(li);
+        li.appendChild(doneBtn);
+
+        
     }
+    function createDoneButton(li){
+        const doneBtn = document.createElement("button");
+        doneBtn.textContent = "Done";
+        
+        doneBtn.onclick = () => {
+            console.log(li);
+            li.classList.add("done");
+            const buttons = li.querySelectorAll("button");
+
+            buttons.forEach(btn =>{
+                btn.disabled=true;
+            });
+            console.log("Task Completed", li.textContent);
+        }
+        return doneBtn;
+    }
+        
 </script>
 
 </body>
