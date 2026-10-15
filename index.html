@@ -17,27 +17,46 @@
 <style>
     #map{
         height: 500px;
+        flex: 1;
     }
     .popup-image{
         max-width: 200px;
         height: auto;
         object-fit: fill;
     }
+     #locations{
+        width:250px;
+    }
+    .location{
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        cursor:pointer;
+    }
+    .location:hover{
+        background: #eee;
+    }
+    .container{
+        display: flex;
+        gap:15px;
+    }
     </style>
     <body>
         <h1>Simple Map</h1>
+        <div class="container">
+        <div id="locations">
+            <h3>Locations</h3>
+            <div id="location-list"></div>
+        </div>
+
+        <h3>Map</h3>
         <div id="map"></div>
+        </div>
     </body>
     <script>
 
         function initMap(mapDataUrl){
-          /*  const map = L.map('map').setView([8.360,124.868], 17);
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-    */
-    //Render map
+         
+       //Render map
     const map = L.map('map').setView([8.360,124.868], 17);
 
     //OpenStreetMap Layer
@@ -69,6 +88,20 @@
             <hr>
             ${image}
             `);
+
+             //Flyto
+            const item = document.createElement("div");
+            item.className = 'location';
+            item.textContent = pin.title;
+
+            document.getElementById(`location-list`).appendChild(item);
+
+            item.onclick = () => {
+                map.flyTo([pin.lat, pin.lng], 18);
+                
+                marker.openPopup();
+            }
+            
         });
         
         //Layer Control
