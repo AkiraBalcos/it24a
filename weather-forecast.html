@@ -22,11 +22,10 @@
     <div id="weatherResult"></div>
 
     <div id="forecastResult"></div>
-    
+
 <script>
 
     const apiKey = "34d6477da623e6e5898ac862936fe73b";
-
     async function getWeather() {
 
         const city = prompt("Enter a city name");
@@ -61,23 +60,103 @@
         }
     }
 
-    function getWeatherByCoordinates(lat, lon) {
+    async function getWeatherByCoordinates(latitude, longitude) {
 
-        document.getElementById("locationResult").innerHTML =
-            `Latitude: ${lat}<br>
-             Longitude: ${lon}`;
+        const weatherUrl =
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
 
-        console.log("Latitude:", lat);
-        console.log("Longitude:", lon);
+        const forecastUrl =
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
 
+        try {
+
+            // CURRENT WEATHER
+            const weatherResponse = await fetch(weatherUrl);
+
+            if (!weatherResponse.ok) {
+                throw new Error("Unable to retrieve weather");
+            }
+
+            const data = await weatherResponse.json();
+
+            document.getElementById("locationResult").innerHTML =
+                `Location: ${data.name}, ${data.sys.country}`;
+
+            document.getElementById("weatherResult").innerHTML = `
+
+                <h2>Current Weather</h2>
+
+                <h3>${data.name}, ${data.sys.country}</h3>
+
+                <img
+                    src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png"
+                    alt="${data.weather[0].description}"
+                >
+
+                <p>Temperature: ${data.main.temp} °C</p>
+
+                <p>Weather: ${data.weather[0].description}</p>
+
+                <p>Humidity: ${data.main.humidity}%</p>
+
+                <p>Wind Speed: ${data.wind.speed} m/s</p>
+
+            `;
+
+            const forecastResponse = await fetch(forecastUrl);
+
+            if (!forecastResponse.ok) {
+                throw new Error("Unable to retrieve forecast");
+            }
+
+            const forecastData = await forecastResponse.json();
+
+            document.getElementById("forecastResult").innerHTML = `
+
+                <hr>
+
+                <h2>5-Day Weather Forecast</h2>
+
+                ${forecastData.list
+                    .filter(item => item.dt_txt.includes("12:00:00"))
+                    .map(item => `
+
+                        <div>
+
+                            <h3>${item.dt_txt}</h3>
+
+                            <img
+                                src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"
+                                alt="${item.weather[0].description}"
+                            >
+
+                            <p>Temperature: ${item.main.temp} °C</p>
+
+                            <p>Weather: ${item.weather[0].description}</p>
+
+                            <p>Humidity: ${item.main.humidity}%</p>
+
+                        </div>
+
+                    `).join("")}
+
+            `;
+
+        } catch (error) {
+
+            alert("Error: " + error.message);
+
+        }
     }
-
     function getGPSLocation() {
 
         if (!navigator.geolocation) {
             alert("Geolocation is not supported by your browser.");
             return;
         }
+
+        document.getElementById("locationResult").innerHTML =
+            "Getting your location...";
 
         navigator.geolocation.getCurrentPosition(
 
@@ -92,45 +171,17 @@
 
             function(error) {
 
-                alert("Unable to get your location.");
-                console.error(error);
+                document.getElementById("locationResult").innerHTML = "";
+
+                alert("GPS Error: " + error.message);
 
             }
 
         );
 
     }
-function getGPSLocation() {
 
-    if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser.");
-        return;
-    }
-
-    document.getElementById("locationResult").innerHTML =
-        "Getting your location...";
-
-    navigator.geolocation.getCurrentPosition(
-
-        function(position) {
-
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-
-            getWeatherByCoordinates(latitude, longitude);
-
-        },
-
-        function(error) {
-
-            document.getElementById("locationResult").innerHTML = "";
-
-            alert("GPS Error: " + error.message);
-
-        }
-
-    );
-}
 </script>
+
 </body>
 </html>
